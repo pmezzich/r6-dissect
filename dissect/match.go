@@ -271,8 +271,12 @@ func (m *MatchReader) WriteExcel(out io.Writer) error {
 }
 
 func (m *MatchReader) WriteJSON(out io.Writer) error {
-	encoder := json.NewEncoder(out)
-	return encoder.Encode(m.Data())
+	b, err := json.MarshalIndent(m.Data(), "", "  ")
+	if err != nil {
+		return err
+	}
+	_, err = out.Write(b)
+	return err
 }
 
 func (m *MatchReader) Data() any {
