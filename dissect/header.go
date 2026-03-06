@@ -27,7 +27,7 @@ type Header struct {
 	OvertimeRoundNumber    int       `json:"overtimeRoundNumber"`
 	Teams                  [2]Team   `json:"teams"`
 	Players                []Player  `json:"players"`
-	GMSettings             []int     `json:"gmSettings"`
+	GMSettings             []int64   `json:"gmSettings"`
 	PlaylistCategory       int       `json:"playlistCategory,omitempty"`
 	MatchID                string    `json:"matchID"`
 }
@@ -47,24 +47,24 @@ type Player struct {
 	Username     string   `json:"username"`
 	TeamIndex    int      `json:"teamIndex"`
 	Operator     Operator `json:"operator"`
-	HeroName     int      `json:"heroName,omitempty"`
-	Alliance     int      `json:"alliance"`
-	RoleImage    int      `json:"roleImage,omitempty"`
+	HeroName     int64    `json:"heroName,omitempty"`
+	Alliance     int64    `json:"alliance"`
+	RoleImage    int64    `json:"roleImage,omitempty"`
 	RoleName     string   `json:"roleName,omitempty"`
-	RolePortrait int      `json:"rolePortrait,omitempty"`
+	RolePortrait int64    `json:"rolePortrait,omitempty"`
 	Spawn        string   `json:"spawn,omitempty"`
 	DissectID    []byte   `json:"-" deep:"-"` // dissect player id at end of packet (4 bytes)
 	uiID         uint64   `json:"-" deep:"-"`
 }
 
-type stringerIntMarshal struct {
+type stringerInt64Marshal struct {
 	Name string `json:"name"`
-	ID   int    `json:"id"`
+	ID   int64  `json:"id"`
 }
 
-type MatchType int
-type GameMode int
-type Map int
+type MatchType int64
+type GameMode int64
+type Map int64
 type WinCondition string
 type TeamRole string
 type Operator uint64
@@ -80,48 +80,49 @@ const (
 	CustomGameLocal  MatchType = 3
 	CustomGameOnline MatchType = 4
 	Standard         MatchType = 8 // Y8S3~Y10S1
-	Unranked		 MatchType = 9 // Y10S2~
+	Unranked         MatchType = 9 // Y10S2~
 
 	Bomb           GameMode = 327933806
 	SecureArea     GameMode = 1983085217
 	Hostage        GameMode = 2838806006
 	QuickMatchBomb GameMode = 400168582901
 
-	ClubHouse           Map = 837214085
-	KafeDostoyevsky     Map = 1378191338
-	Kanal               Map = 1460220617
-	Yacht               Map = 1767965020
-	PresidentialPlane   Map = 2609218856
-	ConsulateY7         Map = 2609221242
-	BartlettU           Map = 2697268122
-	Coastline           Map = 42090092951
-	Tower               Map = 53627213396
-	Villa               Map = 88107330328
-	Fortress            Map = 126196841359
-	HerefordBase        Map = 127951053400
-	ThemePark           Map = 199824623654
-	Oregon              Map = 231702797556
-	House               Map = 237873412352
-	Chalet              Map = 259816839773
-	Skyscraper          Map = 276279025182
-	Border              Map = 305979357167
-	Favela              Map = 329867321446
-	Bank                Map = 355496559878
-	Outback             Map = 362605108559
-	EmeraldPlains       Map = 365284490964
-	StadiumBravo        Map = 270063334510
-	NighthavenLabs      Map = 378595635123
-	Consulate           Map = 379218689149
-	Lair                Map = 388073319671
-	Stadium2020         Map = 405306299908
-	BankY10             Map = 413779563590
-	BorderY10           Map = 407987100456
-	ChaletY10           Map = 407558616688
-	ClubHouseY10        Map = 407193663917
-	KafeDostoyevskyY10  Map = 413845419788
-	LairY10             Map = 417890697769
-	NighthavenLabsY10   Map = 418119057546
-	ConsulateY10           Map = 418126004176
+	ClubHouse          Map = 837214085
+	KafeDostoyevsky    Map = 1378191338
+	Kanal              Map = 1460220617
+	Yacht              Map = 1767965020
+	PresidentialPlane  Map = 2609218856
+	ConsulateY7        Map = 2609221242
+	BartlettU          Map = 2697268122
+	Coastline          Map = 42090092951
+	Tower              Map = 53627213396
+	Villa              Map = 88107330328
+	Fortress           Map = 126196841359
+	HerefordBase       Map = 127951053400
+	ThemePark          Map = 199824623654
+	Oregon             Map = 231702797556
+	House              Map = 237873412352
+	Chalet             Map = 259816839773
+	Skyscraper         Map = 276279025182
+	Border             Map = 305979357167
+	Favela             Map = 329867321446
+	Bank               Map = 355496559878
+	Outback            Map = 362605108559
+	EmeraldPlains      Map = 365284490964
+	StadiumBravo       Map = 270063334510
+	NighthavenLabs     Map = 378595635123
+	Consulate          Map = 379218689149
+	Lair               Map = 388073319671
+	Stadium2020        Map = 405306299908
+	BankY10            Map = 413779563590
+	BorderY10          Map = 407987100456
+	ChaletY10          Map = 407558616688
+	ClubHouseY10       Map = 407193663917
+	KafeDostoyevskyY10 Map = 413845419788
+	LairY10            Map = 417890697769
+	NighthavenLabsY10  Map = 418119057546
+	ConsulateY10       Map = 418126004176
+	FortressY10        Map = 398899676157
 
 	KilledOpponents  WinCondition = "KilledOpponents"
 	SecuredArea      WinCondition = "SecuredArea" // TODO
@@ -210,20 +211,21 @@ const (
 	Skopos      Operator = 386098331713
 	Rauora      Operator = 386098331923
 	Denari      Operator = 374667787937
+	SolidSnake  Operator = 444310693746
 )
 
 // duplicated code here could be avoided by defining a generic function accepting any Number type.
 // that kind of constraint is still experimental though (as of Go 1.20.2): https://pkg.go.dev/golang.org/x/exp/constraints
 
 func (i MatchType) MarshalJSON() (text []byte, err error) {
-	return json.Marshal(stringerIntMarshal{
+	return json.Marshal(stringerInt64Marshal{
 		Name: i.String(),
-		ID:   int(i),
+		ID:   int64(i),
 	})
 }
 
 func (i *MatchType) UnmarshalJSON(data []byte) (err error) {
-	var x stringerIntMarshal
+	var x stringerInt64Marshal
 	if err = json.Unmarshal(data, &x); err != nil {
 		return
 	}
@@ -232,14 +234,14 @@ func (i *MatchType) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (i GameMode) MarshalJSON() (text []byte, err error) {
-	return json.Marshal(stringerIntMarshal{
+	return json.Marshal(stringerInt64Marshal{
 		Name: i.String(),
-		ID:   int(i),
+		ID:   int64(i),
 	})
 }
 
 func (i *GameMode) UnmarshalJSON(data []byte) (err error) {
-	var x stringerIntMarshal
+	var x stringerInt64Marshal
 	if err = json.Unmarshal(data, &x); err != nil {
 		return
 	}
@@ -248,14 +250,14 @@ func (i *GameMode) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (i Map) MarshalJSON() (text []byte, err error) {
-	return json.Marshal(stringerIntMarshal{
+	return json.Marshal(stringerInt64Marshal{
 		Name: i.String(),
-		ID:   int(i),
+		ID:   int64(i),
 	})
 }
 
 func (i *Map) UnmarshalJSON(data []byte) (err error) {
-	var x stringerIntMarshal
+	var x stringerInt64Marshal
 	if err = json.Unmarshal(data, &x); err != nil {
 		return
 	}
@@ -264,14 +266,14 @@ func (i *Map) UnmarshalJSON(data []byte) (err error) {
 }
 
 func (i Operator) MarshalJSON() (text []byte, err error) {
-	return json.Marshal(stringerIntMarshal{
+	return json.Marshal(stringerInt64Marshal{
 		Name: i.String(),
-		ID:   int(i),
+		ID:   int64(i),
 	})
 }
 
 func (i *Operator) UnmarshalJSON(data []byte) (err error) {
-	var x stringerIntMarshal
+	var x stringerInt64Marshal
 	if err = json.Unmarshal(data, &x); err != nil {
 		return
 	}
@@ -340,7 +342,7 @@ func (r *Reader) readHeaderMagic() error {
 
 func (r *Reader) readHeader() (Header, error) {
 	props := make(map[string]string)
-	gmSettings := make([]int, 0)
+	gmSettings := make([]int64, 0)
 	players := make([]Player, 0)
 	// Loops until the last property is mapped.
 	currentPlayer := Player{}
@@ -366,14 +368,14 @@ func (r *Reader) readHeader() (Header, error) {
 			playerData = false
 		}
 		if !playerData {
-			if k != "gmsetting" {
-				props[k] = v
-			} else {
-				n, err := strconv.Atoi(v)
+			if k == "gmsetting" {
+				n, err := strconv.ParseInt(v, 10, 64)
 				if err != nil {
 					return Header{}, err
 				}
 				gmSettings = append(gmSettings, n)
+			} else {
+				props[k] = v
 			}
 		} else {
 			switch k {
@@ -386,25 +388,25 @@ func (r *Reader) readHeader() (Header, error) {
 			case "playername":
 				currentPlayer.Username = v
 			case "team":
-				n, err := strconv.Atoi(v)
+				n, err := strconv.ParseInt(v, 10, 64)
 				if err != nil {
 					return Header{}, err
 				}
-				currentPlayer.TeamIndex = n
+				currentPlayer.TeamIndex = int(n)
 			case "heroname":
-				n, err := strconv.Atoi(v)
+				n, err := strconv.ParseInt(v, 10, 64)
 				if err != nil {
 					return Header{}, err
 				}
 				currentPlayer.HeroName = n
 			case "alliance":
-				n, err := strconv.Atoi(v)
+				n, err := strconv.ParseInt(v, 10, 64)
 				if err != nil {
 					return Header{}, err
 				}
 				currentPlayer.Alliance = n
 			case "roleimage":
-				n, err := strconv.Atoi(v)
+				n, err := strconv.ParseInt(v, 10, 64)
 				if err != nil {
 					return Header{}, err
 				}
@@ -412,7 +414,7 @@ func (r *Reader) readHeader() (Header, error) {
 			case "rolename":
 				currentPlayer.RoleName = v
 			case "roleportrait":
-				n, err := strconv.Atoi(v)
+				n, err := strconv.ParseInt(v, 10, 64)
 				if err != nil {
 					return Header{}, err
 				}
@@ -431,25 +433,25 @@ func (r *Reader) readHeader() (Header, error) {
 	// Parse game version
 	h.GameVersion = props["version"]
 	// Parse code version
-	n, err := strconv.Atoi(props["code"])
+	n, err := strconv.ParseInt(props["code"], 10, 64)
 	if err != nil {
 		return h, err
 	}
-	h.CodeVersion = n
+	h.CodeVersion = int(n)
 	// Parse timestamp
-	t, err := time.Parse("2006-01-02-15-04-05", props["datetime"])
+	tt, err := time.Parse("2006-01-02-15-04-05", props["datetime"])
 	if err != nil {
 		return h, err
 	}
-	h.Timestamp = t
+	h.Timestamp = tt
 	// Parse match type
-	n, err = strconv.Atoi(props["matchtype"])
+	n, err = strconv.ParseInt(props["matchtype"], 10, 64)
 	if err != nil {
 		return h, err
 	}
 	h.MatchType = MatchType(n)
 	// Parse map
-	n, err = strconv.Atoi(props["worldid"])
+	n, err = strconv.ParseInt(props["worldid"], 10, 64)
 	if err != nil {
 		return h, err
 	}
@@ -464,71 +466,71 @@ func (r *Reader) readHeader() (Header, error) {
 	// Add additional tags
 	h.AdditionalTags = props["additionaltags"]
 	// Parse game mode
-	n, err = strconv.Atoi(props["gamemodeid"])
+	n, err = strconv.ParseInt(props["gamemodeid"], 10, 64)
 	if err != nil {
 		return h, err
 	}
 	h.GameMode = GameMode(n)
 	// Parse rounds per match
-	n, err = strconv.Atoi(props["roundspermatch"])
+	n, err = strconv.ParseInt(props["roundspermatch"], 10, 64)
 	if err != nil {
 		return h, err
 	}
-	h.RoundsPerMatch = n
+	h.RoundsPerMatch = int(n)
 	// Parse rounds per match overtime
-	n, err = strconv.Atoi(props["roundspermatchovertime"])
+	n, err = strconv.ParseInt(props["roundspermatchovertime"], 10, 64)
 	if err != nil {
 		return h, err
 	}
-	h.RoundsPerMatchOvertime = n
+	h.RoundsPerMatchOvertime = int(n)
 	// Parse round number
-	n, err = strconv.Atoi(props["roundnumber"])
+	n, err = strconv.ParseInt(props["roundnumber"], 10, 64)
 	if err != nil {
 		return h, err
 	}
-	h.RoundNumber = n
+	h.RoundNumber = int(n)
 	// Parse overtime round number
-	n, err = strconv.Atoi(props["overtimeroundnumber"])
+	n, err = strconv.ParseInt(props["overtimeroundnumber"], 10, 64)
 	if err != nil {
 		return h, err
 	}
-	h.OvertimeRoundNumber = n
+	h.OvertimeRoundNumber = int(n)
 	// Add team names
 	h.Teams[0].Name = props["teamname0"]
 	h.Teams[1].Name = props["teamname1"]
 	// Add playlist category
 	if len(props["playlistcategory"]) > 0 {
-		n, err = strconv.Atoi(props["playlistcategory"])
+		n, err = strconv.ParseInt(props["playlistcategory"], 10, 64)
 		if err != nil {
 			log.Debug().Err(err).Msg("omitting playlistcategory")
 		}
-		h.PlaylistCategory = n
+		h.PlaylistCategory = int(n)
 	}
 	// Add match id
 	h.MatchID = props["id"]
 	// Parse team scores
-	n, err = strconv.Atoi(props["teamscore0"])
+	n, err = strconv.ParseInt(props["teamscore0"], 10, 64)
 	if err != nil {
 		return h, err
 	}
-	h.Teams[0].Score = n
-	n, err = strconv.Atoi(props["teamscore1"])
+	h.Teams[0].Score = int(n)
+	n, err = strconv.ParseInt(props["teamscore1"], 10, 64)
 	if err != nil {
 		return h, err
 	}
-	h.Teams[1].Score = n
+	h.Teams[1].Score = int(n)
 	// Parse starting team scores
 	if h.CodeVersion >= Y9S4 {
-		n, err = strconv.Atoi(props["startingteamscore0"])
+		n, err = strconv.ParseInt(props["startingteamscore0"], 10, 64)
 		if err != nil {
 			return h, err
 		}
-		h.Teams[0].StartingScore = n
-		n, err = strconv.Atoi(props["startingteamscore1"])
+		h.Teams[0].StartingScore = int(n)
+		n, err = strconv.ParseInt(props["startingteamscore1"], 10, 64)
 		if err != nil {
 			return h, err
 		}
-		h.Teams[1].StartingScore = n
+		h.Teams[1].StartingScore = int(n)
 	}
 
 	return h, nil
