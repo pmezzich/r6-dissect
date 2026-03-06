@@ -170,12 +170,16 @@ func writeRound(in io.Reader, out io.Writer) error {
 	if err := r.Read(); !dissect.Ok(err) {
 		return err
 	}
-	encoder := json.NewEncoder(out)
-	return encoder.Encode(output{
+	b, err := json.MarshalIndent(output{
 		r.Header,
 		r.MatchFeedback,
 		r.PlayerStats(),
-	})
+	}, "", "  ")
+	if err != nil {
+		return err
+	}
+	_, err = out.Write(b)
+	return err
 }
 
 func writeRoundDump(in io.Reader, out *os.File) error {
