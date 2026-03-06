@@ -4,13 +4,14 @@ package main
 import "C"
 import (
 	"encoding/json"
+	"os"
+
 	"github.com/redraskal/r6-dissect/dissect"
 	"github.com/rs/zerolog"
-	"os"
 )
 
 func marshalToString(v any) string {
-	b, err := json.Marshal(v)
+	b, err := json.MarshalIndent(v, "", "  ")
 	if err != nil {
 		return "{\"error\":\"something went wrong during json Marshal\"}"
 	}
